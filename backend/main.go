@@ -4,48 +4,19 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/gorilla/websocket"
+	"github.com/nabinkatwal7/chat/pkg/ws"
 )
 
-var upgrader = websocket.Upgrader{
-	ReadBufferSize:  1024,
-	WriteBufferSize: 1024,
-	CheckOrigin: func(r *http.Request) bool {
-		return true
-	},
-}
-
-func reader(conn *websocket.Conn) {
-	for{
-		messageType, p, err := conn.ReadMessage()
-		if err != nil {
-			fmt.Println(err)
-			return
-		}
-		fmt.Println(string(p))
-
-		if err := conn.WriteMessage(messageType, p); err != nil {
-			fmt.Println(err)
-			return
-		}
-	}
-}
-
 func serveWs (w http.ResponseWriter, r *http.Request) {
-	fmt.Println("WebSocket Endpoint Hit", r.Host)
-
-	ws, err := upgrader.Upgrade(w, r, nil)
+	socket, err := ws.Upgrade(w, r)
 	if err != nil {
 		fmt.Println(err)
 	}
-	reader(ws)
+	go ws.Writer(socket)
+	ws.Reader(socket)
 }
 
 func setupRoutes(){
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprintf(w, "Hello World")
-	})
-
 	http.HandleFunc("/ws", serveWs)
 }
 
