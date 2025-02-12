@@ -7,17 +7,27 @@ import (
 	"github.com/nabinkatwal7/chat/pkg/ws"
 )
 
-func serveWs (w http.ResponseWriter, r *http.Request) {
+func serveWs (pool *ws.Pool, w http.ResponseWriter, r *http.Request) {
+	fmt.Println("WebSocket Endpoint Hit")
 	socket, err := ws.Upgrade(w, r)
 	if err != nil {
 		fmt.Println(err)
 	}
-	go ws.Writer(socket)
-	ws.Reader(socket)
+
+	client := &ws.Client{
+		Conn: socket,
+		Pool: pool,
+	}
+
+	pool.Register <- client
+	client.Read()
 }
 
 func setupRoutes(){
-	http.HandleFunc("/ws", serveWs)
+	pool := ws.NewPool()
+	go pool.Start()
+	http.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
+		serveWs(pool, w, r)})
 }
 
 func main() {
