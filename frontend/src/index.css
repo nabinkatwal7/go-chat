@@ -1,1 +1,9 @@
 @import "tailwindcss";
+
+.message {
+  @apply block bg-white mx-auto my-2.5 shadow-lg shadow-black/20 p-2.5 px-5 rounded-md clear-both;
+}
+
+.message.me {
+  @apply text-white float-right bg-[#328ec4];
+}

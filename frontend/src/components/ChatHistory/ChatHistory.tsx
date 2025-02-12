@@ -3,7 +3,9 @@ const ChatHistory = ({ messages }: { messages: string[] }) => {
     <div className="bg-[#f7f7f7] m-0 p-[20px]">
       <h2>History</h2>
       {messages.map((message, index) => (
-        <p key={index}>{message}</p>
+        <div key={index} className="message">
+          {message}
+        </div>
       ))}
     </div>
   );
